@@ -1,0 +1,164 @@
+<link href='http://fonts.googleapis.com/css?family=Molengo&subset=latin' rel='stylesheet' type='text/css'>
+<style type="text/css">
+    body {
+        min-width: 357px;
+        overflow-x: hidden;
+        font-family: 'Molengo', arial, serif;
+    }
+
+    .block {
+        border: gray 1px solid;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px;
+    }
+</style>
+
+<script type="text/javascript" src="Row.js"></script>
+<script type="text/javascript">
+
+    var currentDomain;
+
+
+    function addRow() {
+        req = new XMLHttpRequest();
+        req.open(
+                'POST',
+                localStorage['postURL'], // TODO: Can be null
+                true);
+        req.onload = function(resp) {
+            console.log('Im done: ' + req)
+        };
+        req.overrideMimeType('text/xml');
+        req.setRequestHeader("Content-type", "application/atom+xml");
+        req.send('<entry xmlns="http://www.w3.org/2005/Atom"\
+    xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended">\
+  <gsx:' + localStorage['urlRowName'] + '>' + currentDomain + '</gsx:name>     \
+  <gsx:' + localStorage['captionRowName'] + '>' + document.getElementById('title').value + '</gsx:login>       \
+  <gsx:' + localStorage['textRowName'] + '>' + document.getElementById('text').value + '</gsx:password>        \
+</entry>');
+    }
+
+    function get_hostname_from_url(url) {
+        var host = url.match(/:\/\/(.[^/]+)/)[1];
+        if (host.indexOf('www.') > -1) {
+            host = host.substring(4, host.length);
+        }
+        return host;
+    }
+
+
+    function initAddBtn() {
+        document.getElementById('add').onclick = function() {
+            hideMenu();
+            hideLoadingIndicator();
+            document.getElementById('addForm').style.display = 'block';
+            document.getElementById('save').onclick = function() {
+                addRow();
+                var status = document.getElementById("notes");
+                status.innerHTML = "Saved.";
+                setTimeout(function() {
+                    status.innerHTML = "";
+                    updateRows(function() {
+                        this.close();
+                    });
+                }, 1250);
+                document.getElementById('addForm').style.display = 'none';
+            };
+        };
+    }
+    function initShowBtn(rows) {
+        document.getElementById('show').onclick = function() {
+            hideMenu();
+            chrome.tabs.getSelected(null, function(tab) {
+                var url = tab.url;
+                for (var i = 0, row; row = rows[i]; i++) {
+                    if (url.indexOf(row.urlRowName) > -1) {
+                        var title = document.createElement('b');
+                        var div = document.createElement('div');
+                        var text = document.createTextNode(row.captionRowName);
+                        title.appendChild(text);
+                        text = document.createTextNode(row.textRowName);
+                        div.appendChild(title);
+                        div.appendChild(document.createElement('br'));
+                        div.appendChild(text);
+                        div.setAttribute('class', 'block');
+                        document.getElementById('notes').appendChild(div);
+                    }
+                }
+            });
+        };
+    }
+    function initPopup() {
+        chrome.extension.sendRequest({request: "get-rows"}, function(o) {
+            var rows = o.response;
+            document.getElementById('show').style.display = 'none';
+            // TODO: remove duplicate below (inject this checking to initShowBtn)
+            chrome.tabs.getSelected(null, function(tab) {
+                var url = tab.url;
+                currentDomain = get_hostname_from_url(tab.url);
+                for (var i = 0, row; row = rows[i]; i++) {
+                    if (url.indexOf(row.urlRowName) > -1) {
+                        document.getElementById('show').style.display = 'block';
+                        break;
+                    }
+                }
+            });
+            initShowBtn(rows);
+        });
+    }
+
+    function updateRows(fn) {
+        chrome.extension.sendRequest({request: "update-rows"}, fn || function() {
+        });
+    }
+
+    function hideMenu() {
+        document.getElementById('menu').style.display = 'none';
+    }
+    function showLoadingIndicator() {
+        document.getElementById('loading').style.display = 'block';
+    }
+    function hideLoadingIndicator() {
+        document.getElementById('loading').style.display = 'none';
+    }
+
+    chrome.extension.onRequest.addListener(
+            function(request, sender, sendResponse) {
+                if (request.request == "rows-updated") {
+                    hideLoadingIndicator();
+                    initPopup();
+                } else {
+                    sendResponse({}); // snub them.
+                }
+            });
+</script>
+
+<body onload="showLoadingIndicator(); updateRows(); initAddBtn();">
+<table id="menu">
+    <tr>
+        <td><h4><a id="show" style="display:none;" href="javascript:void(0)">Show</a></h4></td>
+        <td><h4><a id="add" href="javascript:void(0)">Add</a></h4></td>
+    </tr>
+</table>
+
+<div id="loading">Loading...</div>
+
+<div id="addForm" style="display:none;">
+    <table>
+        <tr>
+            <td colspan="2"><input type="text" id="title"></td>
+        </tr>
+        <tr>
+            <td colspan="2"><textarea rows="5" cols="25" id="text"></textarea></td>
+        </tr>
+        <tr>
+            <td><h4><a id="save" href="javascript:void(0)">Save</a></h4></td>
+            <td><h4><a id="cancel" href="javascript:this.close();">Cancel</a></h4></td>
+        </tr>
+    </table>
+</div>
+
+<div id="notes"></div>
+
+</body>
