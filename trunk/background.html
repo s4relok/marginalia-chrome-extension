@@ -1,0 +1,105 @@
+<script type="text/javascript" src="Row.js"></script>
+
+<script type="text/javascript">
+    var tableName;
+    var rows = [];
+    var req = new XMLHttpRequest();
+
+    chrome.extension.onRequest.addListener(
+            function(request, sender, sendResponse) {
+                if (request.request == "get-rows") {
+                    init();
+                    sendResponse({response: rows});
+                } else if (request.request == "update-rows") {
+                    init();
+                    sendResponse({});
+                }
+                else {
+                    sendResponse({}); // snub them.
+                }
+            });
+
+
+    function init() {
+	tableName = localStorage['tableName'];
+        req.open(
+                'GET',
+                'https://spreadsheets.google.com/feeds/spreadsheets/private/full',
+                true);
+        req.onload = selectSpreadsheet;
+        req.send(null);
+    }
+
+    init();
+
+
+    function selectSpreadsheet() {
+        var entries = req.responseXML.getElementsByTagName('entry');
+        for (var i = 0, entry; entry = entries[i]; i++) {
+            var title = entry.getElementsByTagName('title');
+            if (title[0].childNodes[0].nodeValue == tableName) {
+                var links = entry.getElementsByTagName('link');
+                for (var j = 0, link; link = links[j]; j++) {
+                    if (link.getAttribute('type') == 'application/atom+xml') {
+                        var url = link.getAttribute('href');
+                        req = new XMLHttpRequest();
+                        req.open(
+                                'GET',
+                                url,
+                                true);
+                        req.onload = getSpreadsheet;
+                        req.send(null);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    function getSpreadsheet() {
+        var xmlDoc = parseFromString(req.responseText);
+        var entries = xmlDoc.getElementsByTagName('entry');
+        for (var i = 0, entry; entry = entries[i]; i++) {
+            var links = entry.getElementsByTagName('link');
+            for (var j = 0, link; link = links[j]; j++) {
+                if (link.getAttribute('type') == 'application/atom+xml') {
+                    var url = link.getAttribute('href');
+                    req = new XMLHttpRequest();
+                    req.open(
+                            'GET',
+                            url,
+                            true);
+                    req.onload = buildRows;
+                    req.send(null);
+                    return;
+                }
+            }
+        }
+    }
+
+    function buildRows() {
+        rows = [];
+        var xmlDoc = parseFromString(req.responseText);
+        var links = xmlDoc.getElementsByTagName('link');
+        for (var i = 0, link; link = links[i]; i++) {
+            if (link.getAttribute('rel') == 'http://schemas.google.com/g/2005#post') {
+                localStorage['postURL'] = link.getAttribute('href');
+                break;
+            }
+        }
+        var entries = xmlDoc.getElementsByTagName('entry');
+        for (var i = 0, entry; entry = entries[i]; i++) {
+            var row = new pb.Row(entry);
+            rows.push(row);
+        }
+
+        chrome.extension.sendRequest({request: "rows-updated"}, function() {
+            console.log('background: rows-updated')
+        });
+    }
+
+    function parseFromString(txt) {
+        var parser = new DOMParser();
+        return parser.parseFromString(txt, 'text/xml');
+    }
+</script>

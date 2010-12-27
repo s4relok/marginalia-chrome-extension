@@ -1,0 +1,83 @@
+<html>
+<head>
+    <title>Marginalia Options</title>
+    <link href='http://fonts.googleapis.com/css?family=Molengo&subset=latin' rel='stylesheet' type='text/css'>
+    <style type="text/css">
+        body {
+            font-family: 'Molengo', arial, serif;
+            text-align: center;
+        }
+    </style>
+</head>
+<script type="text/javascript">
+
+    // Saves options to localStorage.
+    function save_options() {
+        localStorage["tableName"] = document.getElementById("tableName").value.toLowerCase();
+        localStorage["urlRowName"] = document.getElementById("urlRowName").value.toLowerCase();
+        localStorage["captionRowName"] = document.getElementById("captionRowName").value.toLowerCase();
+        localStorage["textRowName"] = document.getElementById("textRowName").value.toLowerCase();
+
+        // Update status to let user know options were saved.
+        var status = document.getElementById("status");
+        status.innerHTML = "Options Saved.";
+        setTimeout(function() {
+            status.innerHTML = "";
+        }, 1250);
+    }
+
+    // Restores select box state to saved value from localStorage.
+    function restore_options() {
+        document.getElementById("tableName").value = localStorage["tableName"] || '';
+        document.getElementById("urlRowName").value = localStorage["urlRowName"] || '';
+        document.getElementById("captionRowName").value = localStorage["captionRowName"] || '';
+        document.getElementById("textRowName").value = localStorage["textRowName"] || '';
+    }
+
+</script>
+
+<body onload="restore_options()">
+    <table align="center">
+        <tr>
+            <td>
+                <label for="tableName">Table name:</label>
+            </td>
+            <td>
+                <input type="text" name="tableName" id="tableName">
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <label for="urlRowName">URL row name:</label>
+            </td>
+            <td>
+                <input type="text" name="urlRowName" id="urlRowName">
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <label for="captionRowName">Caption row name:</label>
+            </td>
+            <td>
+                <input type="text" name="captionRowName" id="captionRowName">
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <label for="textRowName">Text row name:</label>
+            </td>
+            <td>
+                <input type="text" name="textRowName" id="textRowName">
+            </td>
+        </tr>
+    </table>
+
+<div id="status"></div>
+
+<br>
+<button onclick="save_options()">Save</button>
+</body>
+</html>
