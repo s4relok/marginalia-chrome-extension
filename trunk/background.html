@@ -3,25 +3,30 @@
 <script type="text/javascript">
     var tableName;
     var rows = [];
+    var count = 0;
     var req = new XMLHttpRequest();
 
     chrome.extension.onRequest.addListener(
-            function(request, sender, sendResponse) {
-                if (request.request == "get-rows") {
-                    init();
-                    sendResponse({response: rows});
-                } else if (request.request == "update-rows") {
-                    init();
-                    sendResponse({});
-                }
-                else {
-                    sendResponse({}); // snub them.
-                }
-            });
+                                          function(request, sender, sendResponse) {
+                                              if (request.request == "get-rows") {
+//                                                  rows = [];
+//                                                  count = 0;
+//                                                  init();
+                                                  sendResponse({response: rows});
+                                              } else if (request.request == "update-rows") {
+                                                  rows = [];
+                                                  count = 0;
+                                                  init();
+                                                  sendResponse({});
+                                              }
+                                              else {
+                                                  sendResponse({}); // snub them.
+                                              }
+                                          });
 
 
     function init() {
-	tableName = localStorage['tableName'];
+        tableName = localStorage['tableName'];
         req.open(
                 'GET',
                 'https://spreadsheets.google.com/feeds/spreadsheets/private/full',
@@ -78,7 +83,6 @@
     }
 
     function buildRows() {
-        rows = [];
         var xmlDoc = parseFromString(req.responseText);
         var links = xmlDoc.getElementsByTagName('link');
         for (var i = 0, link; link = links[i]; i++) {
@@ -93,9 +97,18 @@
             rows.push(row);
         }
 
-        chrome.extension.sendRequest({request: "rows-updated"}, function() {
-            console.log('background: rows-updated')
-        });
+        count++;
+
+        // If counter equals number of accounts
+        if (count >= 1) {
+            chrome.extension.sendRequest({request: "rows-updated"}, function() {
+                console.log('background: rows-updated')
+            });
+        } else {
+            init();
+        }
+
+
     }
 
     function parseFromString(txt) {
