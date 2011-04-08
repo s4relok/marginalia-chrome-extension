@@ -28,10 +28,41 @@
 
     // Restores select box state to saved value from localStorage.
     function restore_options() {
-        document.getElementById("tableName").value = localStorage["tableName"] || '';
-        document.getElementById("urlRowName").value = localStorage["urlRowName"] || '';
-        document.getElementById("captionRowName").value = localStorage["captionRowName"] || '';
-        document.getElementById("textRowName").value = localStorage["textRowName"] || '';
+        document.getElementById("tableName").value = localStorage.global["tableName"] || '';
+        document.getElementById("urlRowName").value = localStorage.global["urlRowName"] || '';
+        document.getElementById("captionRowName").value = localStorage.global["captionRowName"] || '';
+        document.getElementById("textRowName").value = localStorage.global["textRowName"] || '';
+    }
+
+    function add_account(){
+        console.log("add account");
+
+        /** TODO:
+         *
+         *  # FEATURE LIST #
+         *
+         *  1. Multiple accounts. For instance, one acc is common, aonther one is with job issues
+         *  localhost for on luxoft machine returns domain login data
+         *  localhost for notebook returns password for local instance tomcat and mongodb
+         *  In result must be 2 accounts - one global, another one local, connected with current infrastructure
+         *  each enviroment can has own local settings
+         *
+         *  So, Global account contains data which is relevant from any locations
+         *  And, Local account contains data is usable only from one machine or closed network
+         *
+         *  1) Create UI with radio buttons (see)
+         *  2) For mechanism of extension there is no difference between local or any onther account, so
+         *  they must be saved in array without keys,
+         *  localStorage.accounts = []
+         *  global - index 0
+         *  local - index 1
+         *  Change mechanism to ajust for this logic.
+         *
+         *  2. Ability to delete or edit (???)
+         *
+         *  3. Show data from buffer (save values for current site in local storage, probably)
+         *
+          */
     }
 
 </script>
@@ -73,11 +104,24 @@
                 <input type="text" name="textRowName" id="textRowName">
             </td>
         </tr>
+
+        <tr>
+            <td>
+                Local: <input type="radio" name="accountType" value="local"/>
+            </td>
+            <td>
+                Global: <input type="radio" name="accountType" value="global"/>
+            </td>
+        </tr>
+
     </table>
 
 <div id="status"></div>
 
 <br>
+
+
 <button onclick="save_options()">Save</button>
+<!--<button onclick="add_account()">Add account</button>-->
 </body>
 </html>
