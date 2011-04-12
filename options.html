@@ -10,13 +10,19 @@
     </style>
 </head>
 <script type="text/javascript">
+    var ACCOUNT_TYPES = {global:0, local:1};
 
     // Saves options to localStorage.
     function save_options() {
-        localStorage["tableName"] = document.getElementById("tableName").value.toLowerCase();
-        localStorage["urlRowName"] = document.getElementById("urlRowName").value.toLowerCase();
-        localStorage["captionRowName"] = document.getElementById("captionRowName").value.toLowerCase();
-        localStorage["textRowName"] = document.getElementById("textRowName").value.toLowerCase();
+        var accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+        var accountType = window.document.getElementsByName("accountType")[1].checked ? 0 : 1;
+        accounts[accountType] = {};
+        accounts[accountType]["tableName"] = document.getElementById("tableName").value.toLowerCase();
+        accounts[accountType]["urlRowName"] = document.getElementById("urlRowName").value.toLowerCase();
+        accounts[accountType]["captionRowName"] = document.getElementById("captionRowName").value.toLowerCase();
+        accounts[accountType]["textRowName"] = document.getElementById("textRowName").value.toLowerCase();
+
+        localStorage.setItem("accounts", JSON.stringify(accounts));
 
         // Update status to let user know options were saved.
         var status = document.getElementById("status");
@@ -26,15 +32,21 @@
         }, 1250);
     }
 
-    // Restores select box state to saved value from localStorage.
-    function restore_options() {
-        document.getElementById("tableName").value = localStorage.global["tableName"] || '';
-        document.getElementById("urlRowName").value = localStorage.global["urlRowName"] || '';
-        document.getElementById("captionRowName").value = localStorage.global["captionRowName"] || '';
-        document.getElementById("textRowName").value = localStorage.global["textRowName"] || '';
+    // Restores select box state to saved value from localStorage. Here is used value of first
+    // account in a list
+    function restore_options(accountType) {
+        var accounts = JSON.parse(localStorage.getItem("accounts"));
+        var index = ACCOUNT_TYPES[accountType];
+        if (!accounts[index]) {
+            return;
+        }
+        document.getElementById("tableName").value = accounts[index]["tableName"] || '';
+        document.getElementById("urlRowName").value = accounts[index]["urlRowName"] || '';
+        document.getElementById("captionRowName").value = accounts[index]["captionRowName"] || '';
+        document.getElementById("textRowName").value = accounts[index]["textRowName"] || '';
     }
 
-    function add_account(){
+    function add_account() {
         console.log("add account");
 
         /** TODO:
@@ -51,6 +63,9 @@
          *  And, Local account contains data is usable only from one machine or closed network
          *
          *  1) Create UI with radio buttons (see)
+         *  1.1 Handler for radio buttons
+         *
+         *
          *  2) For mechanism of extension there is no difference between local or any onther account, so
          *  they must be saved in array without keys,
          *  localStorage.accounts = []
@@ -62,59 +77,59 @@
          *
          *  3. Show data from buffer (save values for current site in local storage, probably)
          *
-          */
+         */
     }
 
 </script>
 
-<body onload="restore_options()">
-    <table align="center">
-        <tr>
-            <td>
-                <label for="tableName">Table name:</label>
-            </td>
-            <td>
-                <input type="text" name="tableName" id="tableName">
-            </td>
-        </tr>
+<body onload="restore_options('global')">
+<table align="center">
+    <tr>
+        <td>
+            <label for="tableName">Table name:</label>
+        </td>
+        <td>
+            <input type="text" name="tableName" id="tableName">
+        </td>
+    </tr>
 
-        <tr>
-            <td>
-                <label for="urlRowName">URL column name:</label>
-            </td>
-            <td>
-                <input type="text" name="urlRowName" id="urlRowName">
-            </td>
-        </tr>
+    <tr>
+        <td>
+            <label for="urlRowName">URL column name:</label>
+        </td>
+        <td>
+            <input type="text" name="urlRowName" id="urlRowName">
+        </td>
+    </tr>
 
-        <tr>
-            <td>
-                <label for="captionRowName">Caption column name:</label>
-            </td>
-            <td>
-                <input type="text" name="captionRowName" id="captionRowName">
-            </td>
-        </tr>
+    <tr>
+        <td>
+            <label for="captionRowName">Caption column name:</label>
+        </td>
+        <td>
+            <input type="text" name="captionRowName" id="captionRowName">
+        </td>
+    </tr>
 
-        <tr>
-            <td>
-                <label for="textRowName">Text column name:</label>
-            </td>
-            <td>
-                <input type="text" name="textRowName" id="textRowName">
-            </td>
-        </tr>
+    <tr>
+        <td>
+            <label for="textRowName">Text column name:</label>
+        </td>
+        <td>
+            <input type="text" name="textRowName" id="textRowName">
+        </td>
+    </tr>
 
-        <tr>
-            <td>
-                Local: <input type="radio" name="accountType" value="local"/>
-            </td>
-            <td>
-                Global: <input type="radio" name="accountType" value="global"/>
-            </td>
-        </tr>
+    <tr>
+        <td>
+            Local: <input type="radio" name="accountType" value="local" onchange="restore_options(this.value)"/>
+        </td>
+        <td>
+            Global: <input type="radio" checked name="accountType" value="global" onchange="restore_options(this.value)"/>
+        </td>
+    </tr>
 
-    </table>
+</table>
 
 <div id="status"></div>
 
