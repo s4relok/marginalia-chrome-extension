@@ -26,7 +26,8 @@
 
 
     function init() {
-        tableName = localStorage['tableName'];
+        var accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+        tableName = accounts[count]['tableName'];
         req.open(
                 'GET',
                 'https://spreadsheets.google.com/feeds/spreadsheets/private/full',
@@ -100,7 +101,7 @@
         count++;
 
         // If counter equals number of accounts
-        if (count >= 1) {
+        if (count >= JSON.parse(localStorage.getItem("accounts")).length) {
             chrome.extension.sendRequest({request: "rows-updated"}, function() {
                 console.log('background: rows-updated')
             });

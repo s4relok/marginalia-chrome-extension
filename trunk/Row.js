@@ -3,9 +3,10 @@ var pb = {};
 
 // Domain class that represents row from spreadsheet
 pb.Row = function(entry) {
-    this.urlRowName = this.getValue(entry, localStorage['urlRowName']);
-    this.captionRowName = this.getValue(entry, localStorage['captionRowName']);
-    this.textRowName = this.getValue(entry, localStorage['textRowName']);
+    var accounts = JSON.parse(localStorage.getItem("accounts")) || [];
+    this.urlRowName = this.getValue(entry, accounts[0]['urlRowName']);
+    this.captionRowName = this.getValue(entry, accounts[0]['captionRowName']);
+    this.textRowName = this.getValue(entry, accounts[0]['textRowName']);
 };
 
 pb.Row.prototype.getValue = function (entry, name){
