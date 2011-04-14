@@ -18,7 +18,7 @@
 <script type="text/javascript">
 
     var currentDomain;
-
+    var firstFoundText;
 
     function addRow() {
         req = new XMLHttpRequest();
@@ -46,7 +46,6 @@
         }
         return host;
     }
-
 
     function initAddBtn() {
         document.getElementById('add').onclick = function() {
@@ -99,13 +98,33 @@
                 currentDomain = get_hostname_from_url(tab.url);
                 for (var i = 0, row; row = rows[i]; i++) {
                     if (url.indexOf(row.urlRowName) > -1) {
+                        firstFoundText = row.textRowName;
                         document.getElementById('show').style.display = 'block';
+                        document.getElementById('copy').style.display = 'block';
+                        // TODO: check Experimental fucntion
+                        copy();
                         break;
                     }
                 }
             });
             initShowBtn(rows);
         });
+    }
+
+    function copy(callback) {
+        chrome.extension.sendRequest({request: "copy-text", text: firstFoundText}, function(o) {
+            if (callback) {
+                callback.call();
+            }
+        });
+    }
+
+    function initCopyButton() {
+        document.getElementById('copy').onclick = function() {
+            copy(function() {
+                this.close();
+            });
+        }
     }
 
     function updateRows(fn) {
@@ -134,11 +153,12 @@
             });
 </script>
 
-<body onload="showLoadingIndicator(); updateRows(); initAddBtn();">
+<body onload="showLoadingIndicator(); updateRows(); initAddBtn(); initCopyButton();">
 <table id="menu">
     <tr>
         <td><h4><a id="show" style="display:none;" href="javascript:void(0)">Show</a></h4></td>
         <td><h4><a id="add" href="javascript:void(0)">Add</a></h4></td>
+        <td><h4><a id="copy" style="display:none;" href="javascript:void(0)">Copy first</a></h4></td>
     </tr>
 </table>
 

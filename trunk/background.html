@@ -7,23 +7,25 @@
     var req = new XMLHttpRequest();
 
     chrome.extension.onRequest.addListener(
-                                          function(request, sender, sendResponse) {
-                                              if (request.request == "get-rows") {
-//                                                  rows = [];
-//                                                  count = 0;
-//                                                  init();
-                                                  sendResponse({response: rows});
-                                              } else if (request.request == "update-rows") {
-                                                  rows = [];
-                                                  count = 0;
-                                                  init();
-                                                  sendResponse({});
-                                              }
-                                              else {
-                                                  sendResponse({}); // snub them.
-                                              }
-                                          });
-
+            function(request, sender, sendResponse) {
+                switch (request.request) {
+                    case "get-rows":
+                        sendResponse({response: rows});
+                        break;
+                    case "update-rows":
+                        rows = [];
+                        count = 0;
+                        init();
+                        sendResponse({});
+                        break;
+                    case "copy-text":
+                        copyToClipboard(request.text);
+                        sendResponse({});
+                        break;
+                    default:
+                        sendResponse({}); // snub them.
+                }
+            });
 
     function init() {
         var accounts = JSON.parse(localStorage.getItem("accounts")) || [];
@@ -37,7 +39,6 @@
     }
 
     init();
-
 
     function selectSpreadsheet() {
         var entries = req.responseXML.getElementsByTagName('entry');
@@ -109,7 +110,17 @@
             init();
         }
 
+    }
 
+    function copyToClipboard(text) {
+        var input = document.getElementById('text');
+
+        if (input == undefined)
+            return;
+
+        input.value = text;
+        input.select();
+        document.execCommand('Copy');
     }
 
     function parseFromString(txt) {
@@ -117,3 +128,9 @@
         return parser.parseFromString(txt, 'text/xml');
     }
 </script>
+
+<html>
+<body>
+<input type="text" id="text">
+</body>
+</html>
