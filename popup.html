@@ -22,9 +22,7 @@
 
     function addRow() {
         req = new XMLHttpRequest();
-        req.open(
-                'POST',
-                localStorage['postURL'], // TODO: Can be null
+        req.open('POST', localStorage['postURL'], // TODO: Can be null
                 true);
         req.onload = function(resp) {
             console.log('Im done: ' + req)
@@ -47,21 +45,29 @@
         return host;
     }
 
+    function showMessage(message, callback) {
+        var status = document.getElementById("notes");
+        status.innerHTML = message;
+        setTimeout(function() {
+            callback.call();
+        }, 1250);
+    }
+
     function initAddBtn() {
         document.getElementById('add').onclick = function() {
             hideMenu();
             hideLoadingIndicator();
             document.getElementById('addForm').style.display = 'block';
+
+
             document.getElementById('save').onclick = function() {
                 addRow();
-                var status = document.getElementById("notes");
-                status.innerHTML = "Saved.";
-                setTimeout(function() {
-                    status.innerHTML = "";
+                showMessage("Saved.", function() {
                     updateRows(function() {
+                        status.innerHTML = "";
                         this.close();
                     });
-                }, 1250);
+                });
                 document.getElementById('addForm').style.display = 'none';
             };
         };
@@ -142,15 +148,18 @@
         document.getElementById('loading').style.display = 'none';
     }
 
-    chrome.extension.onRequest.addListener(
-            function(request, sender, sendResponse) {
-                if (request.request == "rows-updated") {
-                    hideLoadingIndicator();
-                    initPopup();
-                } else {
-                    sendResponse({}); // snub them.
-                }
+    chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+        if (request.request == "rows-updated") {
+            hideLoadingIndicator();
+            initPopup();
+        } else if (request.request == "spreadsheet-not-found") {
+            console.log("spreadsheet-not-found");
+            showMessage("Spreadsheet " + request.tableName + " not found", function() {
             });
+        } else {
+            sendResponse({}); // snub them.
+        }
+    });
 </script>
 
 <body onload="showLoadingIndicator(); updateRows(); initAddBtn(); initCopyButton();">

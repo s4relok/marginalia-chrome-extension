@@ -17,10 +17,10 @@
         var accounts = JSON.parse(localStorage.getItem("accounts")) || [];
         var accountType = window.document.getElementsByName("accountType")[1].checked ? 0 : 1;
         accounts[accountType] = {};
-        accounts[accountType]["tableName"] = document.getElementById("tableName").value.toLowerCase();
-        accounts[accountType]["urlRowName"] = document.getElementById("urlRowName").value.toLowerCase();
-        accounts[accountType]["captionRowName"] = document.getElementById("captionRowName").value.toLowerCase();
-        accounts[accountType]["textRowName"] = document.getElementById("textRowName").value.toLowerCase();
+        accounts[accountType]["tableName"] = document.getElementById("tableName").value;
+        accounts[accountType]["urlRowName"] = document.getElementById("urlRowName").value;
+        accounts[accountType]["captionRowName"] = document.getElementById("captionRowName").value;
+        accounts[accountType]["textRowName"] = document.getElementById("textRowName").value;
 
         localStorage.setItem("accounts", JSON.stringify(accounts));
 

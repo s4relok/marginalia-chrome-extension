@@ -30,10 +30,7 @@
     function init() {
         var accounts = JSON.parse(localStorage.getItem("accounts")) || [];
         tableName = accounts[count]['tableName'];
-        req.open(
-                'GET',
-                'https://spreadsheets.google.com/feeds/spreadsheets/private/full',
-                true);
+        req.open('GET', 'https://spreadsheets.google.com/feeds/spreadsheets/private/full', true);
         req.onload = selectSpreadsheet;
         req.send(null);
     }
@@ -50,10 +47,7 @@
                     if (link.getAttribute('type') == 'application/atom+xml') {
                         var url = link.getAttribute('href');
                         req = new XMLHttpRequest();
-                        req.open(
-                                'GET',
-                                url,
-                                true);
+                        req.open('GET', url, true);
                         req.onload = getSpreadsheet;
                         req.send(null);
                         return;
@@ -61,6 +55,8 @@
                 }
             }
         }
+        notFoundRequest("spreadsheet");
+        nextSpreadsheetOrFinish();
     }
 
     function getSpreadsheet() {
@@ -72,23 +68,22 @@
                 if (link.getAttribute('type') == 'application/atom+xml') {
                     var url = link.getAttribute('href');
                     req = new XMLHttpRequest();
-                    req.open(
-                            'GET',
-                            url,
-                            true);
+                    req.open('GET', url, true);
                     req.onload = buildRows;
                     req.send(null);
                     return;
                 }
             }
         }
+        notFoundRequest("spreadsheet link");
+        nextSpreadsheetOrFinish();
     }
 
     function buildRows() {
         var xmlDoc = parseFromString(req.responseText);
         var links = xmlDoc.getElementsByTagName('link');
         for (var i = 0, link; link = links[i]; i++) {
-            if (link.getAttribute('rel') == 'http://schemas.google.com/g/2005#post') {
+            if (count == 0 && link.getAttribute('rel') == 'http://schemas.google.com/g/2005#post') {
                 localStorage['postURL'] = link.getAttribute('href');
                 break;
             }
@@ -98,14 +93,14 @@
             var row = new pb.Row(entry);
             rows.push(row);
         }
+        nextSpreadsheetOrFinish();
+    }
 
+    function nextSpreadsheetOrFinish() {
         count++;
-
         // If counter equals number of accounts
         if (count >= JSON.parse(localStorage.getItem("accounts")).length) {
-            chrome.extension.sendRequest({request: "rows-updated"}, function() {
-                console.log('background: rows-updated')
-            });
+            rowsUpdatedRequest();
         } else {
             init();
         }
@@ -122,7 +117,23 @@
         input.select();
         document.execCommand('Copy');
     }
+    function rowsUpdatedRequest() {
+        chrome.extension.sendRequest({request: "rows-updated"}, function() {
+            console.log('background: rows-updated')
+        });
+    }
+    function notFoundRequest(what) {
+        if (what == "spreadsheet") {
+            chrome.extension.sendRequest({request: "spreadsheet-not-found", tableName: tableName}, function() {
+                console.log('background: spreadsheet-not-found ' + tableName);
+            });
+        } else if (what == "spreadsheet link") {
+            chrome.extension.sendRequest({request: "spreadsheet-not-found", tableName: tableName}, function() {
+                console.log('background: spreadsheet-not-found ' + tableName);
+            });
+        }
 
+    }
     function parseFromString(txt) {
         var parser = new DOMParser();
         return parser.parseFromString(txt, 'text/xml');
