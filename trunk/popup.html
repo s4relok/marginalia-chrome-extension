@@ -25,18 +25,15 @@
         req.open('POST', localStorage['postURL'], // TODO: Can be null
                 true);
         req.onload = function(resp) {
-            console.log('Im done: ' + req);
-            if (resp.status != 200) {
-                showMessage("Can't add row. \n Bad request: " + req + "\n Bad response: " + resp);
-            }
+            console.log('Im done: ' + resp.statusText);
         };
         req.overrideMimeType('text/xml');
         req.setRequestHeader("Content-type", "application/atom+xml");
         req.send('<entry xmlns="http://www.w3.org/2005/Atom"\
     xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended">\
-  <gsx:' + localStorage['urlRowName'] + '>' + currentDomain + '</gsx:name>     \
-  <gsx:' + localStorage['captionRowName'] + '>' + document.getElementById('title').value + '</gsx:login>       \
-  <gsx:' + localStorage['textRowName'] + '>' + document.getElementById('text').value + '</gsx:password>        \
+  <gsx:' + localStorage['urlRowName'] + '>' + currentDomain + '</gsx:' + localStorage['urlRowName'] + '>     \
+  <gsx:' + localStorage['captionRowName'] + '>' + document.getElementById('title').value + '</gsx:' + localStorage['captionRowName'] + '>       \
+  <gsx:' + localStorage['textRowName'] + '>' + document.getElementById('text').value + '</gsx:' + localStorage['textRowName'] + '>        \
 </entry>');
     }
 
