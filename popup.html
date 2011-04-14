@@ -25,7 +25,10 @@
         req.open('POST', localStorage['postURL'], // TODO: Can be null
                 true);
         req.onload = function(resp) {
-            console.log('Im done: ' + req)
+            console.log('Im done: ' + req);
+            if (resp.status != 200) {
+                showMessage("Can't add row. \n Bad request: " + req + "\n Bad response: " + resp);
+            }
         };
         req.overrideMimeType('text/xml');
         req.setRequestHeader("Content-type", "application/atom+xml");
