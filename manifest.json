@@ -1,6 +1,6 @@
 {
     "name": "Marginalia",
-    "version": "0.80",
+    "version": "0.85",
     "description": "Write your notes in the margin of websites and store it in Google Docs.",
     "background_page": "background.html",
     "options_page": "options.html",
