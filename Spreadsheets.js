@@ -56,7 +56,7 @@ Spreadsheets = (function() {
     function buildRows() {
         var xmlDocument = parseTextToXML(request.responseText);
         var links = xmlDocument.getElementsByTagName('link');
-        if (!localStorage['postURL']) {
+        if (!isKeyValueData && !localStorage['postURL']) {
             for (var i = 0, link; link = links[i]; i++) {
                 if (link.getAttribute('rel') == 'http://schemas.google.com/g/2005#post') {
                     localStorage['postURL'] = link.getAttribute('href');
@@ -67,7 +67,7 @@ Spreadsheets = (function() {
         var entries = xmlDocument.getElementsByTagName('entry');
         for (var i = 0, entry; entry = entries[i]; i++) {
             var row;
-            if(isKeyValueData){
+            if (isKeyValueData) {
                 row = {};
                 row[getNodeValue(entry, "key")] = getNodeValue(entry, "value");
             } else {
@@ -102,17 +102,23 @@ Spreadsheets = (function() {
             request.open('GET', 'https://spreadsheets.google.com/feeds/spreadsheets/private/full', true);
             request.onload = selectSpreadsheet;
             request.send(null);
+        },
+
+        addRow: function(options, values) {
+            request = new XMLHttpRequest();
+            request.open('POST', localStorage['postURL'], // TODO: Can be null
+                    true);
+            request.onload = function(resp) {
+                console.log('addRow onload call: ' + resp.statusText);
+            };
+            request.overrideMimeType('text/xml');
+            request.setRequestHeader("Content-type", "application/atom+xml");
+            request.send('<entry xmlns="http://www.w3.org/2005/Atom"\
+    xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended">\
+  <gsx:' + options['urlRowName'] + '>' + values['domain'] + '</gsx:' + options['urlRowName'] + '>     \
+  <gsx:' + options['captionRowName'] + '>' + values['title'] + '</gsx:' + options['captionRowName'] + '>       \
+  <gsx:' + options['textRowName'] + '>' + values['text'] + '</gsx:' + options['textRowName'] + '>        \
+</entry>');
         }
     }
 })();
-
-/**
- * TODO: clarify how accounts work
- *
- * Working case:
- * <entry xmlns="http://www.w3.org/2005/Atom"    xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended">  <gsx:name>docs.google.com</gsx:name>       <gsx:login>111</gsx:login>         <gsx:password>111</gsx:password>        </entry>
- *
- * Not working:
- * "<entry xmlns="http://www.w3.org/2005/Atom"    xmlns:gsx="http://schemas.google.com/spreadsheets/2006/extended">  <gsx:undefined>docs.google.com</gsx:undefined>       <gsx:undefined>123</gsx:undefined>         <gsx:undefined>123</gsx:undefined>        </entry>"
- *
- */
