@@ -10,19 +10,15 @@
     </style>
 </head>
 <script type="text/javascript">
-    var ACCOUNT_TYPES = {global:0, local:1};
 
     // Saves options to localStorage.
     function save_options() {
-        var accounts = JSON.parse(localStorage.getItem("accounts")) || [];
-        var accountType = window.document.getElementsByName("accountType")[1].checked ? 0 : 1;
-        accounts[accountType] = {};
-        accounts[accountType]["tableName"] = document.getElementById("tableName").value;
-        accounts[accountType]["urlRowName"] = document.getElementById("urlRowName").value;
-        accounts[accountType]["captionRowName"] = document.getElementById("captionRowName").value;
-        accounts[accountType]["textRowName"] = document.getElementById("textRowName").value;
-
-        localStorage.setItem("accounts", JSON.stringify(accounts));
+        var options = {};
+        options["tableName"] = document.getElementById("tableName").value;
+        options["urlRowName"] = document.getElementById("urlRowName").value;
+        options["captionRowName"] = document.getElementById("captionRowName").value;
+        options["textRowName"] = document.getElementById("textRowName").value;
+        localStorage.setItem("options", JSON.stringify(options));
 
         // Update status to let user know options were saved.
         var status = document.getElementById("status");
@@ -32,37 +28,17 @@
         }, 1250);
     }
 
-    // Restores select box state to saved value from localStorage. Here is used value of first
-    // account in a list
-    function restore_options(accountType) {
-        var accounts = JSON.parse(localStorage.getItem("accounts"));
-        var index = ACCOUNT_TYPES[accountType];
-        if (!accounts[index]) {
-            return;
-        }
-        document.getElementById("tableName").value = accounts[index]["tableName"] || '';
-        document.getElementById("urlRowName").value = accounts[index]["urlRowName"] || '';
-        document.getElementById("captionRowName").value = accounts[index]["captionRowName"] || '';
-        document.getElementById("textRowName").value = accounts[index]["textRowName"] || '';
+    // Restores select box state to saved value from localStorage. Here is used value of first// account in a list
+    function restore_options() {
+        var options = JSON.parse(localStorage.getItem("options"));
+        document.getElementById("tableName").value = options["tableName"] || '';
+        document.getElementById("urlRowName").value = options["urlRowName"] || '';
+        document.getElementById("captionRowName").value = options["captionRowName"] || '';
+        document.getElementById("textRowName").value = options["textRowName"] || '';
     }
-
-    function add_account() {
-        console.log("add account");
-
-        /** TODO:
-         *
-         *  # FEATURE LIST #
-         *
-         *  1  "Copy first" feature
-         *
-         *  2. Show data from buffer (save values for current site in local storage, probably)
-         *
-         */
-    }
-
 </script>
 
-<body onload="restore_options('global')">
+<body onload="restore_options()">
 <table align="center">
     <tr>
         <td>
@@ -100,15 +76,6 @@
         </td>
     </tr>
 
-    <tr>
-        <td>
-            Local: <input type="radio" name="accountType" value="local" onchange="restore_options(this.value)"/>
-        </td>
-        <td>
-            Global: <input type="radio" checked name="accountType" value="global" onchange="restore_options(this.value)"/>
-        </td>
-    </tr>
-
 </table>
 
 <div id="status"></div>
@@ -117,6 +84,5 @@
 
 
 <button onclick="save_options()">Save</button>
-<!--<button onclick="add_account()">Add account</button>-->
 </body>
 </html>
