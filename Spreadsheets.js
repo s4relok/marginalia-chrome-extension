@@ -119,6 +119,55 @@ Spreadsheets = (function() {
   <gsx:' + options['captionRowName'] + '>' + values['title'] + '</gsx:' + options['captionRowName'] + '>       \
   <gsx:' + options['textRowName'] + '>' + values['text'] + '</gsx:' + options['textRowName'] + '>        \
 </entry>');
-        }
+        },
+
+        updateRow: function(options, values){
+
+
+
+//            request = new XMLHttpRequest();
+//            request.open('PUT', values.editURL,true);
+//            request.onload = function(resp) {
+//                console.log('editRow onload call: ' + resp.statusText);
+//            };
+//            request.overrideMimeType('text/xml');
+//            request.setRequestHeader("Content-type", "application/atom+xml");
+//            request.send('<entry>\
+//  <id>'+ values.id + '</id>          \
+//  <gsx:' + options['urlRowName'] + '>' + values['domain'] + '</gsx:' + options['urlRowName'] + '>     \
+//  <gsx:' + options['captionRowName'] + '>' + values['title'] + '</gsx:' + options['captionRowName'] + '>       \
+//  <gsx:' + options['textRowName'] + '>' + values['text'] + '</gsx:' + options['textRowName'] + '>        \
+//</entry>');
+        },
+
+        updateRowTest: function(row){
+            console.log(row);
+            console.log("UPDATE");
+        request = new XMLHttpRequest();
+        request.open('PUT', row.editURL,true);
+            request.onload = function(resp) {
+                console.log('editRow onload call: ' + resp.statusText);
+                console.log(resp);
+            };
+        request.overrideMimeType('text/xml');
+
+        request.setRequestHeader("Content-type", "application/atom+xml");
+        request.send("<entry xmlns='http://www.w3.org/2005/Atom'>\
+            <id>" + row.idURL + "</id>\
+            <category scheme='http://schemas.google.com/spreadsheets/2006'\
+            term='http://schemas.google.com/spreadsheets/2006#list'/>\
+            <link rel='self' type='application/atom+xml'\
+            href='" + row.idURL + "'/>\
+            <link rel='edit' type='application/atom+xml'\
+            href='"+ row.editURL +"'/>\
+                <gsx:name xmlns:gsx='http://schemas.google.com/spreadsheets/2006/extended'>"+ row.urlRowName +"</gsx:name>\
+                <gsx:login xmlns:gsx='http://schemas.google.com/spreadsheets/2006/extended'>" + row.captionRowName + "</gsx:login>\
+            <gsx:password xmlns:gsx='http://schemas.google.com/spreadsheets/2006/extended'>" + encodeURIComponent(row.textRowName) + "</gsx:password>\
+            <gsx:urloranotherkey xmlns:gsx='http://schemas.google.com/spreadsheets/2006/extended'></gsx:urloranotherkey>\
+                <gsx:comment xmlns:gsx='http://schemas.google.com/spreadsheets/2006/extended'></gsx:comment>\
+                <gsx:lastuse xmlns:gsx='http://schemas.google.com/spreadsheets/2006/extended'>"+ JSON.stringify(new Date()) +"</gsx:lastuse>\
+            </entry>");
+
+    }
     }
 })();

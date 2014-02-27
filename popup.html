@@ -1,4 +1,4 @@
-<link href='http://fonts.googleapis.com/css?family=Molengo&subset=latin' rel='stylesheet' type='text/css'>
+<!--<link href='http://fonts.googleapis.com/css?family=Molengo&subset=latin' rel='stylesheet' type='text/css'>-->
 <style type="text/css">
     body {
         min-width: 357px;
@@ -19,7 +19,7 @@
 <body>
 <table id="menu">
     <tr>
-        <td><h4><a id="show" style="display:none;" href="javascript:void(0)">Show</a></h4></td>
+        <td><h4><a id="show" style="display:none;" href="javascript:;">Show</a></h4></td>
         <td><h4><a id="add" href="javascript:void(0)">Add</a></h4></td>
         <td><h4><a id="copy" style="display:none;" href="javascript:void(0)">Copy first</a></h4></td>
     </tr>
@@ -30,7 +30,12 @@
 <div id="addForm" style="display:none;">
     <table>
         <tr>
-            <td colspan="2"><input type="text" id="title"></td>
+            <td colspan="2">
+                <input type="text" id="title">
+                <!--<input type="text" id="id" style="display: none">-->
+                <!--<input type="text" id="editURL" style="display: none">-->
+
+            </td>
         </tr>
         <tr>
             <td colspan="2"><textarea rows="5" cols="25" id="text"></textarea></td>

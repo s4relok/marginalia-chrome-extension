@@ -1,12 +1,16 @@
 var currentDomain;
     var firstFoundText;
 
+var _rows;
+
     function addRow() {
         var options = JSON.parse(localStorage.getItem("options"));
         var values = {
             domain: currentDomain,
             title: document.getElementById('title').value,
-            text: document.getElementById('text').value
+            text: document.getElementById('text').value,
+            id: "",
+            editURL: ""
         };
         Spreadsheets.addRow(options, values);
     }
@@ -57,10 +61,26 @@ var currentDomain;
                         var div = document.createElement('div');
                         var text = document.createTextNode(row.captionRowName);
                         title.appendChild(text);
-                        text = document.createTextNode(row.textRowName);
+                        //text = document.createTextNode(row.textRowName);
+
+
                         div.appendChild(title);
-                        div.appendChild(document.createElement('br'));
+                        div.appendChild(document.createTextNode(" "));
+                        text = document.createElement('a');
+                        text.appendChild(document.createTextNode("cp"));
+                        text.setAttribute("href", "javascript:;");
+                        text.setAttribute("title", row.textRowName);
+                        text.value = row.textRowName;
+                        text.myNumber = i;
+                        text.onclick = function(){
+                            directCopy(this.value);
+                            //console.log("My number is " + this.myNumber) ;
+                            //Spreadsheets.updateRowTest(_rows[this.myNumber]);
+                            window.close();
+                        }
                         div.appendChild(text);
+                        //div.appendChild(document.createElement('br'));
+                        //div.appendChild(text);
                         div.setAttribute('class', 'block');
                         document.getElementById('notes').appendChild(div);
                     }
@@ -71,6 +91,15 @@ var currentDomain;
     function initPopup() {
         chrome.extension.sendMessage({request: "get-rows"}, function(o) {
             var rows = o.response;
+            _rows = rows;
+//            _rows.sort(function(a,b){
+//                if(a.lastuse == null || b.lastuse == null){
+//                    return a.lastuse != null ? -1 : b.lastuse != null ? 1 : 0;
+//                }
+//                a = new Date(a.lastuse);
+//                b = new Date(b.lastuse);
+//                return a>b?-1:a<b?1:0;
+//            });
             document.getElementById('show').style.display = 'none';
             // TODO: remove duplicate below (inject this checking to initShowBtn)
             chrome.tabs.getSelected(null, function(tab) {
@@ -81,8 +110,6 @@ var currentDomain;
                         firstFoundText = row.textRowName;
                         document.getElementById('show').style.display = 'block';
                         document.getElementById('copy').style.display = 'block';
-                        // TODO: check Experimental fucntion
-                        copy();
                         break;
                     }
                 }
@@ -92,7 +119,11 @@ var currentDomain;
     }
 
     function copy(callback) {
+
         directCopy(firstFoundText);
+        if (callback) {
+                    callback.call();
+                }
 	//chrome.extension.sendMessage({request: "copy-text", text: }, function(o) {
         //    if (callback) {
         //        callback.call();
@@ -148,6 +179,7 @@ function copyToClipboard(text) {
     }
 
 function directCopy(str){
+
     //based on http://stackoverflow.com/a/12693636
         document.oncopy = function(event) {
     event.clipboardData.setData("Text", str);
