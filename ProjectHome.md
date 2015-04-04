@@ -1,0 +1,1 @@
+Write your notes in the margin of websites and store it in Google Docs
